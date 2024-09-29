@@ -28,7 +28,7 @@ func MustLoad() *Config {
 	}
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		panic("config file does not exist^ " + path)
+		panic("config file does not exist: " + path)
 	}
 
 	var cfg Config
