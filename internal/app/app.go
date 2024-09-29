@@ -1,13 +1,14 @@
-package grpcapp
+package app
 
 import (
 	"log/slog"
-	grpcapp "sso/internal/app"
 	"time"
+
+	grpcapp "sso/internal/app/grpc"
 )
 
 type App struct {
-	gRPCSrv *grpcapp.App
+	GRPCSrv *grpcapp.App
 }
 
 func New(
@@ -16,9 +17,8 @@ func New(
 	storagePath string,
 	tokenTTL time.Duration,
 ) *App {
-	// Инициализировать хранилище
-
-	// init auth service
+	// TODO: инициализироать хранилище
+	// TODO: init auth service (auth)
 
 	grpcApp := grpcapp.New(log, grpcPort)
 
