@@ -7,3 +7,10 @@ tasks:
     desc: "Migrations"
     cmds:
       - go run ./cmd/migrator/main.go --storage-path=./storage/sso.db --migrations-path=./migrations
+
+  testmigrate:
+    desc: "TestMigrations"
+    cmds:
+      - go run ./cmd/migrator/main.go --storage-path=./storage/sso.db --migrations-path=./tests/migrations --migrations-table=migrations_test
+# task migrate --task file=./cmd/migrator/Taskfile.yaml
+# task testmigrate --task file=./cmd/migrator/Taskfile.yaml
