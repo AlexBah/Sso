@@ -11,7 +11,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      HOST: root@31.43.203.115
+      HOST: alex@31.43.203.115
       DEPLOY_DIRECTORY: /mnt/disk1/grpc-auth
       CONFIG_PATH: /mnt/disk1/grpc-auth/config/prod.yaml
       DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
