@@ -5,9 +5,9 @@ import (
 	"errors"
 
 	ssov1 "sso/gen/go/sso"
+	//	ssov1 "github.com/AlexBah/Protos/gen/go/sso" // returns error
 	"sso/internal/services/auth"
 
-	//	ssov1 "github.com/AlexBah/Protos/gen/go/sso"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

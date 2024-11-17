@@ -1,5 +1,6 @@
 env: "prod"
 storage_path: "/mnt/disk1/grpc-auth/sso.db"
+tls_path: "/etc/letsencrypt/live/krypsy.online/"
 token_ttl: 1h
 grpc:
   port: 44044

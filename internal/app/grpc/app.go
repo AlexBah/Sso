@@ -7,6 +7,7 @@ import (
 	authgrpc "sso/internal/grpc/auth"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 type App struct {
@@ -19,8 +20,21 @@ func New(
 	log *slog.Logger,
 	authService authgrpc.Auth,
 	port int,
+	tlsPath string,
 ) *App {
-	gRPCServer := grpc.NewServer()
+	const op = "grpcapp.New"
+
+	var gRPCServer *grpc.Server
+	if tlsPath == "not exist" {
+		gRPCServer = grpc.NewServer()
+	} else {
+		tlsCreds, err := generateTLSCreds(tlsPath)
+		if err != nil {
+			err = fmt.Errorf("%s: %w", op, err)
+			panic(err)
+		}
+		gRPCServer = grpc.NewServer(grpc.Creds(tlsCreds))
+	}
 
 	authgrpc.Register(gRPCServer, authService)
 
@@ -29,6 +43,14 @@ func New(
 		gRPCServer: gRPCServer,
 		port:       port,
 	}
+}
+
+// generateTLSCreds generate TLS credentials
+// using path of tls sertificate
+func generateTLSCreds(tlsPath string) (credentials.TransportCredentials, error) {
+	certFile := tlsPath + "fullchain.pem"
+	keyFile := tlsPath + "privkey.pem"
+	return credentials.NewServerTLSFromFile(certFile, keyFile)
 }
 
 func (a *App) MustRun() {
