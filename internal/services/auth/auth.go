@@ -25,13 +25,25 @@ type Auth struct {
 type UserSaver interface {
 	SaveUser(
 		ctx context.Context,
-		email string,
+		phone string,
 		passHash []byte,
 	) (uid int64, err error)
+	UpdateUser(
+		ctx context.Context,
+		user_id int64,
+		name string,
+		email string,
+		phone string,
+		passHash []byte,
+	) (bool, error)
+	DeleteUser(
+		ctx context.Context,
+		phone string,
+	) (bool, error)
 }
 
 type UserProvider interface {
-	User(ctx context.Context, email string) (models.User, error)
+	User(ctx context.Context, phone string) (models.User, error)
 	IsAdmin(ctx context.Context, userID int64) (bool, error)
 }
 
@@ -70,39 +82,39 @@ func New(
 // if user doesn't exist, return error.
 func (a *Auth) Login(
 	ctx context.Context,
-	email string,
+	phone string,
 	password string,
 	appID int,
-) (string, error) {
+) (string, string, string, int64, error) {
 	const op = "auth.Login"
 	log := a.log.With(
 		slog.String("op", op),
-		slog.String("username", email),
+		slog.String("phone", phone),
 	)
 
 	log.Info("attempting to login user")
 
-	user, err := a.usrProvider.User(ctx, email)
+	user, err := a.usrProvider.User(ctx, phone)
 	if err != nil {
 		if errors.Is(err, storage.ErrUserNotFound) {
 			a.log.Warn("user not found", sl.Err(err))
-			return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+			return "", "", "", 0, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 		}
 
 		a.log.Error("failed to get user", sl.Err(err))
 
-		return "", fmt.Errorf("%s: %w", op, err)
+		return "", "", "", 0, fmt.Errorf("%s: %w", op, err)
 	}
 
 	if err := bcrypt.CompareHashAndPassword(user.PassHash, []byte(password)); err != nil {
 		a.log.Info("Invalid credentials", sl.Err(err))
 
-		return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		return "", "", "", 0, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 	}
 
 	app, err := a.appProvider.App(ctx, appID)
 	if err != nil {
-		return "", fmt.Errorf("%s:%w", op, err)
+		return "", "", "", 0, fmt.Errorf("%s:%w", op, err)
 	}
 
 	log.Info("user logged in successfully")
@@ -110,10 +122,10 @@ func (a *Auth) Login(
 	token, err := jwt.NewToken(user, app, a.tokenTTL)
 	if err != nil {
 		a.log.Error("failed to generate token", sl.Err(err))
-		return "", fmt.Errorf("%s, %w", op, err)
+		return "", "", "", 0, fmt.Errorf("%s, %w", op, err)
 	}
 
-	return token, nil
+	return user.Name, user.Email, token, user.ID, nil
 }
 
 // RegisterNewUser registers new user in the system and returns user ID.
@@ -161,9 +173,9 @@ func (a *Auth) IsAdmin(ctx context.Context, userID int64) (bool, error) {
 
 	isAdmin, err := a.usrProvider.IsAdmin(ctx, userID)
 	if err != nil {
-		if errors.Is(err, storage.ErrAppNotFound) {
+		if errors.Is(err, storage.ErrUserExists) {
 			log.Warn("user not found", sl.Err(err))
-			return false, fmt.Errorf("%s: %w", op, ErrInvalidAppID)
+			return false, fmt.Errorf("%s: %w", op, ErrUserExists)
 		}
 		return false, fmt.Errorf("%s: %w", op, err)
 	}
@@ -171,4 +183,83 @@ func (a *Auth) IsAdmin(ctx context.Context, userID int64) (bool, error) {
 	log.Info("checked if user is admin", slog.Bool("is_admin", isAdmin))
 
 	return isAdmin, nil
+}
+
+// GetUser receive name of user
+func (a *Auth) GetUser(ctx context.Context, phone string) (string, error) {
+	const op = "auth.GetUser"
+
+	log := a.log.With(
+		slog.String("op", op),
+		slog.String("phone", phone),
+	)
+
+	log.Info("getting information of user")
+
+	user, err := a.usrProvider.User(ctx, phone)
+	if err != nil {
+		if errors.Is(err, storage.ErrUserExists) {
+			log.Warn("user not found", sl.Err(err))
+			return "", fmt.Errorf("%s: %w", op, ErrUserExists)
+		}
+		return "", fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("getted information of user", slog.String("name", user.Name))
+
+	return user.Name, nil
+}
+
+// UpdateUser put new information of user
+//
+// Check token.
+// If owner is not user or admin, return error.
+// If user doesn't exist, return error.
+// Else update information and return success.
+func (a *Auth) UpdateUser(
+	ctx context.Context,
+	user_id int64,
+	name string,
+	email string,
+	phone string,
+	password string,
+	token string,
+) (bool, error) {
+	const op = "auth.UpdateUser"
+	log := a.log.With(
+		slog.String("op", op),
+		slog.String("phone", phone),
+	)
+	log.Info("checking token")
+
+	//	TODO: implement logic from godoc
+
+	log.Info("not implemented")
+
+	return false, nil
+}
+
+// DeleteUser put new information of user
+//
+// Check token.
+// If owner is not user or admin, return error.
+// If user doesn't exist, return error.
+// Else delete user and return success.
+func (a *Auth) DeleteUser(
+	ctx context.Context,
+	phone string,
+	token string,
+) (bool, error) {
+	const op = "auth.DeleteUser"
+	log := a.log.With(
+		slog.String("op", op),
+		slog.String("phone", phone),
+	)
+	log.Info("checking token")
+
+	//	TODO: implement logic from godoc
+
+	log.Info("not implemented")
+
+	return false, nil
 }

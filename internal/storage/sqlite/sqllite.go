@@ -29,15 +29,15 @@ func New(storagePath string) (*Storage, error) {
 }
 
 // SaveUser saves user to db
-func (s *Storage) SaveUser(ctx context.Context, email string, passHash []byte) (int64, error) {
+func (s *Storage) SaveUser(ctx context.Context, phone string, passHash []byte) (int64, error) {
 	const op = "storage.sqlite.SaveUser"
 
-	stmt, err := s.db.Prepare("INSERT INTO users(email, pass_hash) VALUES(?, ?)")
+	stmt, err := s.db.Prepare("INSERT INTO users(phone, pass_hash) VALUES(?, ?)")
 	if err != nil {
 		return 0, fmt.Errorf("%s: %w", op, err)
 	}
 
-	res, err := stmt.ExecContext(ctx, email, passHash)
+	res, err := stmt.ExecContext(ctx, phone, passHash)
 	if err != nil {
 		var sqliteErr sqlite3.Error
 		if errors.As(err, &sqliteErr) && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
@@ -55,19 +55,47 @@ func (s *Storage) SaveUser(ctx context.Context, email string, passHash []byte) (
 	return id, nil
 }
 
-// User returns user by email
-func (s *Storage) User(ctx context.Context, email string) (models.User, error) {
+// UpdateUser updates user to db
+func (s *Storage) UpdateUser(
+	ctx context.Context,
+	user_id int64,
+	name string,
+	email string,
+	phone string,
+	passHash []byte,
+) (bool, error) {
+	const op = "storage.sqlite.UpdateUser"
+
+	//	TODO: implement
+
+	return false, nil
+}
+
+// DeleteUser deletes user from db
+func (s *Storage) DeleteUser(
+	ctx context.Context,
+	phone string,
+) (bool, error) {
+	const op = "storage.sqlite.DeleteUser"
+
+	//	TODO: implement
+
+	return false, nil
+}
+
+// User returns user by phone
+func (s *Storage) User(ctx context.Context, phone string) (models.User, error) {
 	const op = "storage.sqlite.User"
 
-	stmt, err := s.db.Prepare("SELECT id, email, pass_hash FROM users WHERE email = ?")
+	stmt, err := s.db.Prepare("SELECT id, name, email, phone, pass_hash FROM users WHERE phone = ?")
 	if err != nil {
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
-	row := stmt.QueryRowContext(ctx, email)
+	row := stmt.QueryRowContext(ctx, phone)
 
 	var user models.User
-	err = row.Scan(&user.ID, &user.Email, &user.PassHash)
+	err = row.Scan(&user.ID, &user.Name, &user.Email, &user.Phone, &user.PassHash)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return models.User{}, fmt.Errorf("%s: %w", op, storage.ErrUserNotFound)
