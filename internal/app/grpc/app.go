@@ -2,9 +2,10 @@ package grpcapp
 
 import (
 	"fmt"
-	"log/slog"
 	"net"
 	authgrpc "sso/internal/grpc/auth"
+
+	"golang.org/x/exp/slog"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"

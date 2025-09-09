@@ -1,25 +1,28 @@
 package main
 
 import (
-	"log/slog"
 	"os"
 	"os/signal"
 	"sso/internal/app"
 	"sso/internal/config"
+	"sso/internal/lib/logger/setuplogger"
 	"syscall"
+
+	"golang.org/x/exp/slog"
 )
 
+/*
 const (
+
 	envLocal = "local"
 	envDev   = "dev"
 	envProd  = "prod"
-)
 
+)
+*/
 func main() {
 	cfg := config.MustLoad()
-
-	log := setupLogger(cfg.Env)
-
+	log := setuplogger.Setup(cfg.Env)
 	log.Info("starting application")
 
 	application := app.New(log, cfg.GRPC.Port, cfg.StoragePath, cfg.TlsPath, cfg.TokenTTL)
@@ -40,6 +43,7 @@ func main() {
 	log.Info("application stopped")
 }
 
+/*
 func setupLogger(env string) *slog.Logger {
 	var log *slog.Logger
 
@@ -54,3 +58,4 @@ func setupLogger(env string) *slog.Logger {
 
 	return log
 }
+*/

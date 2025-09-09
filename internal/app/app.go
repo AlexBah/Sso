@@ -1,12 +1,13 @@
 package app
 
 import (
-	"log/slog"
 	"time"
 
 	grpcapp "sso/internal/app/grpc"
 	"sso/internal/services/auth"
 	"sso/internal/storage/sqlite"
+
+	"golang.org/x/exp/slog"
 )
 
 type App struct {
