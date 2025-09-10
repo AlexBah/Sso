@@ -131,11 +131,11 @@ func (a *Auth) Login(
 
 // RegisterNewUser registers new user in the system and returns user ID.
 // If user with given username already exists, returns error.
-func (a *Auth) RegisterNewUser(ctx context.Context, email string, pass string) (int64, error) {
+func (a *Auth) RegisterNewUser(ctx context.Context, phone string, pass string) (int64, error) {
 	const op = "auth.RegisterNewUser"
 	log := a.log.With(
 		slog.String("op", op),
-		slog.String("email", email),
+		slog.String("phone", phone),
 	)
 
 	log.Info("registering user")
@@ -146,7 +146,7 @@ func (a *Auth) RegisterNewUser(ctx context.Context, email string, pass string) (
 		return 0, fmt.Errorf("%s: %w", op, err)
 	}
 
-	id, err := a.usrSaver.SaveUser(ctx, email, passHash)
+	id, err := a.usrSaver.SaveUser(ctx, phone, passHash)
 	if err != nil {
 		if errors.Is(err, storage.ErrUserExists) {
 			log.Warn("user already exists", sl.Err(err))

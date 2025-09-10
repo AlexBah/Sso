@@ -84,7 +84,7 @@ func (s *serverAPI) Login(
 	name, email, token, user_id, err := s.auth.Login(ctx, req.GetPhone(), req.GetPassword(), int(req.GetAppId()))
 	if err != nil {
 		if errors.Is(err, auth.ErrInvalidCredentials) {
-			return nil, status.Error(codes.InvalidArgument, "invalid email or password")
+			return nil, status.Error(codes.InvalidArgument, "invalid phone or password")
 		}
 		return nil, status.Error(codes.Internal, "internal error")
 	}
