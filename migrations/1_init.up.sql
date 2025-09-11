@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS users
 (
     id        INTEGER PRIMARY KEY,
-    name      TEXT NOT NULL,
-    email     TEXT NOT NULL,
+    name      TEXT DEFAULT '',
+    email     TEXT DEFAULT '',
     phone     TEXT NOT NULL,
     pass_hash BLOB NOT NULL,
     is_admin  BOOLEAN NOT NULL DEFAULT FALSE,
